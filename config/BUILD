@@ -11,7 +11,7 @@ config_setting(
 
 filegroup(
     name = "base_properties",
-    srcs = glob(["*.properties"]),
+    srcs = ["logback.xml"],
     visibility = ["//visibility:public"],
 )
 
