@@ -100,6 +100,7 @@ public class GoogleCredentialProvider implements RedisCredentialsProvider, Runna
           && this.refreshDuration != null
           && Instant.now().isBefore(this.lastRefreshInstant.plus(this.refreshDuration))) {
         // nothing to do
+        log.log(Level.INFO, "No need to refresh IAM token");
         return;
       }
       refreshTokenNow();
@@ -112,11 +113,11 @@ public class GoogleCredentialProvider implements RedisCredentialsProvider, Runna
 
   private void refreshTokenNow() {
     try {
-      log.log(Level.FINE, "Refreshing IAM token");
+      log.log(Level.WARNING, "Refreshing IAM token");
       googleCredentials.refresh();
       AccessToken accessToken = googleCredentials.getAccessToken();
       if (accessToken != null) {
-        log.log(Level.FINE, "refreshed access token!");
+        log.log(Level.INFO, "refreshed access token!");
         String v = accessToken.getTokenValue();
 
         // got a successful token refresh
@@ -125,7 +126,7 @@ public class GoogleCredentialProvider implements RedisCredentialsProvider, Runna
         // clear the last saved exception
         this.lastException = null;
         log.log(
-            Level.FINE,
+            Level.INFO,
             "IAM token refreshed with lastRefreshInstant ["
                 + lastRefreshInstant
                 + "], refreshDuration ["
@@ -140,9 +141,11 @@ public class GoogleCredentialProvider implements RedisCredentialsProvider, Runna
     } catch (IOException ioe) {
       // Save last exception for inline feedback
       this.lastException = ioe;
+      log.log(Level.SEVERE, "Background IAM token refresh failed", ioe);
       throw new RuntimeException(ioe);
     } catch (Exception e) {
       // Save last exception for inline feedback
+      log.log(Level.SEVERE, "Background IAM token refresh failed", e);
       this.lastException = e;
       // Bubble up for direct feedback
       throw e;
