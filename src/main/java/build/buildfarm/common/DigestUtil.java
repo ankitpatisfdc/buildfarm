@@ -327,8 +327,10 @@ public class DigestUtil {
   public static Digest parseDigest(String digest) {
     String[] components = digest.split("/");
     int length = components.length;
+    if (length < 2) {
+      throw new IllegalArgumentException("digest too short: " + digest);
+    }
     DigestUtil digestUtil;
-    // FIXME index range
     String hash = components[length - 2];
     if (length == 2) {
       digestUtil = parseHash(hash);
